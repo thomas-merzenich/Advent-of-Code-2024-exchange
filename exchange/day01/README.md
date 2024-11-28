@@ -1,5 +1,5 @@
 # Day 1 Exchange
-
+test
 ## Get your daily puzzle at
 
 [2024 Day 1](https://adventofcode.com/2024/day/1)
