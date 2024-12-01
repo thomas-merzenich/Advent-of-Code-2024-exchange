@@ -14,7 +14,7 @@
 #include <time.h>
 
 #define DAY 01
-int part = 1;
+int part = 2;
 
 struct data_entry {
 	int value;
@@ -40,16 +40,36 @@ char* solve(char *path) {
 	qsort(data->right_list, data->list_size, sizeof(struct data_entry),
 			data_entry_compare);
 	uint64_t result = 0;
-	for (int i = 0; i < data->list_size; ++i) {
-		int lv = data->left_list[i].value;
-		int rv = data->right_list[i].value;
-		int li = data->left_list[i].index;
-		int ri = data->right_list[i].index;
-		int diffv = lv > rv ? lv - rv : rv - lv;
-		int diffi = li > ri ? li - ri : ri - li;
-		printf("[%d]: [%.3d]=%.6d : [%.3d]=%.6d ==> [%.3d]:%.6d\n", i, li,
-				lv, ri, rv, diffi, diffv);
-		result += diffv;
+	if (part == 1) {
+		for (int i = 0; i < data->list_size; ++i) {
+			int lv = data->left_list[i].value;
+			int rv = data->right_list[i].value;
+			int li = data->left_list[i].index;
+			int ri = data->right_list[i].index;
+			int diffv = lv > rv ? lv - rv : rv - lv;
+			int diffi = li > ri ? li - ri : ri - li;
+			printf("[%d]: [%.3d]=%.6d : [%.3d]=%.6d ==> [%.3d]:%.6d\n", i, li,
+					lv, ri, rv, diffi, diffv);
+			result += diffv;
+		}
+	} else {
+		uint64_t cnt = 0;
+		for (int li = 0, ri = 0, last = -1; li < data->list_size; ++li) {
+			int lv = data->left_list[li].value;
+			if (lv != last) {
+				cnt = 0;
+				for (; ri < data->list_size; ++ri) {
+					if (data->right_list[ri].value > lv) {
+						break;
+					}
+					if (data->right_list[ri].value == lv) {
+						cnt++;
+					}
+				}
+				last = lv;
+			}
+			result += lv * cnt;
+		}
 	}
 	return u64toa(result);
 }
