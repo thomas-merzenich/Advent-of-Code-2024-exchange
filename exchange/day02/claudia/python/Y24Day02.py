@@ -45,15 +45,20 @@ DAY = "02"
 
 def checkList(inputList, isTest=True, part=1):
     dimInput = len(inputList)
-    decList = sorted(inputList)
-    incList = sorted(inputList, reverse=True)
-    
+    incList = sorted(inputList)
+    decList = sorted(inputList, reverse=True)
+        
     isDec = [(inputList[j] == decList[j]) for j in range(dimInput)]
     isInc = [(inputList[j] == incList[j]) for j in range(dimInput)]
-            
+    
     if all(isDec) or all(isInc):
         steps = [abs(inputList[i-1]-inputList[i]) for i in range(1,dimInput)]
         
+        if all(isDec):
+            strSlope = "decreasing"
+        else:
+            strSlope = "increasing"
+
         if max(steps) <= 3 and min(steps) > 0:
             if isTest and part == 1:
                 diffSteps=sorted(list(set(steps)))
@@ -65,7 +70,7 @@ def checkList(inputList, isTest=True, part=1):
                         strSteps += f"{diffSteps[i]} or "
                     else:
                         strSteps += f"{diffSteps[i]} "
-                print(f"{inputList}: Safe because the levels are all decreasing by {strSteps}")
+                print(f"{inputList}: Safe because the levels are all {strSlope} by {strSteps}")
             return True
         else:
             if isTest and part == 1:
