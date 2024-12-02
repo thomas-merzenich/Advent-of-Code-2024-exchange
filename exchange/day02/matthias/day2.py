@@ -4,9 +4,12 @@ fname2 = "data_02-matthias_baake.txt"
 fname = fname2
 
 with open(fname) as file:
-    inp_l = []
-    for line in file:
-        inp_l.append(list(map(int, line.split())))
+    inp_l = list(
+        map(
+            lambda line: list(map(int, line.split())),
+            file,
+        )
+    )
 
 MIN_DIFF = 1
 MAX_DIFF = 3
