@@ -8,7 +8,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 /**
- * see: https://adventofcode.com/2018/day/1
+ * see: https://adventofcode.com/2024/day/2
  *
  */
 public class Y24Day01 {
