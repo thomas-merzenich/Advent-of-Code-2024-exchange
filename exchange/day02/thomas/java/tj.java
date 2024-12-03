@@ -19,9 +19,26 @@ public class tj {
             if (check(report)) {
                 System.out.println("Report is SAFE!");
                 countSafe++;
-            };
+            } else {
+                if (problemDumpener(report)) {
+                    System.out.println("Report is SAFE!");
+                    countSafe++;
+                }
+            }
         }
         System.out.println("Safe reports: " + countSafe);
+    }
+
+    private static boolean problemDumpener(ArrayList<Integer> report) {
+        for (int i = 0; i < report.size(); i++) {
+            var helpReport = new ArrayList<Integer>(report);
+            helpReport.remove(i);
+            System.out.println("Help report: " + helpReport);
+            if (check(helpReport)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean check(ArrayList<Integer> report) {
