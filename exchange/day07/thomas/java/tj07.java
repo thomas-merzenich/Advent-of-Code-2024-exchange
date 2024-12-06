@@ -1,7 +1,7 @@
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class tj6 {
+public class tj07 {
 
     public class Guard {
         public Integer x;
@@ -45,7 +45,7 @@ public class tj6 {
     }
 
     public void trackGuard() {
-        var basename = "exchange/day06/thomas/";
+        var basename = "exchange/day07/thomas/";
 //        var modus = "-example";
         var modus = "";
         var inputfile = basename + "input" + modus + ".txt";
