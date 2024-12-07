@@ -3,265 +3,115 @@ import java.util.*;
 
 public class tj07 {
 
-    public class Guard {
-        public Integer x;
-        public Integer y;
-        public char direction;
-
-        public Guard(Integer x, Integer y, char direction) {
-            this.x = x;
-            this.y = y;
-            this.direction = direction;
-        }
-
-        public Guard() {
-        }
-
-        @Override
-        public String toString() {
-            return "Guard{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    ", direction=" + direction +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Guard guard = (Guard) o;
-            return ((direction == guard.direction) && (x.equals(guard.x)) && (y.equals(guard.y)));
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y, direction);
-        }
-    }
     public static void main(String[] args) {
-        tj6 tj = new tj6();
-        tj.trackGuard();
+        tj07 tj = new tj07();
+        tj.doThePuzzle();
     }
 
-    public void trackGuard() {
+    public void doThePuzzle() {
         var basename = "exchange/day07/thomas/";
 //        var modus = "-example";
         var modus = "";
         var inputfile = basename + "input" + modus + ".txt";
         var rulesfile = basename + "rules" + modus + ".txt";
         System.out.println("Read " + basename);
-        var lab = readFile(inputfile);
-
-        var guard = findGuard(lab);
-        var inBounds = 0;
-        var steps = 0;
-        printMap(lab);
-        while (inBounds == 0) {
-            inBounds = moveGuard(lab, guard, null);
-            steps++;
-//            System.out.println("step " + steps);
-//            printMap(lab);
-//            System.out.println();
-        }
-        printMap(lab);
-        System.out.println("Guard moved " + steps + " steps");
-        System.out.println("Locations visited: "+countLocations(lab));
-        System.out.println("\n\n");
-
-        var countPositions = 0;
-        for (int x=0; x<lab.length; x++) {
-            for (int y=0; y<lab[x].length; y++) {
-                lab = readFile(inputfile);
-                guard = findGuard(lab);
-                if (lab[x][y] == '.' ) {
-//                    System.out.println("---------------------------------------------------------");
-                    lab[x][y] = 'O';
-//                    System.out.println("Obstacle position: "+x+" "+y);
-                    if (x == 6 && y == 3) {
-                        System.out.println("Hier wird es spannend!");
-                    }
-//                    printMap(lab);
-                    HashSet<Guard> pastPositions = new HashSet<>();
-                    inBounds=0;
-                    while (inBounds == 0) {
-                        inBounds = moveGuard(lab, guard, pastPositions);
-                    }
-//                    printMap(lab);
-                    lab[x][y] = '.';
-                    if (inBounds == -1) {
-//                        System.out.println("Position für Loop gefunden!");
-                        countPositions++;
-                    }
-//                    System.out.println("---------------------------------------------------------");
+        var puzzle = readFile(inputfile);
+        var summe = 0L;
+        for (String aufgabe : puzzle) {
+            System.out.println("aufgabe = " + aufgabe);
+            var soll = Long.valueOf(aufgabe.split(":")[0].trim());
+            System.out.println("soll = " + soll);
+            ArrayList<Long> zahlen = new ArrayList<>();
+            for (String zahl : aufgabe.split(":")[1].split(" ")) {
+                if (zahl.trim().isEmpty()) {
+                    continue;
+                }
+                zahlen.add(Long.valueOf(zahl.trim()));
+            }
+            System.out.println("zahlen = " + zahlen);
+            var ergebnis = evaluate(zahlen);
+            System.out.println("ergebnis = " + ergebnis);
+            for (Long zahl : ergebnis) {
+                if (zahl.equals(soll)) {
+                    summe += zahl;
+                    break;
                 }
             }
         }
-        System.out.println("Positions with loops: "+countPositions);
+        System.out.println("Summe = " + summe);
     }
 
-    private Integer countLocations(Character[][] lab) {
-        var count = 0;
-        for (int x=0; x<lab.length; x++) {
-            for (int y=0; y<lab[x].length; y++) {
-                if ((lab[x][y] == '-') || (lab[x][y] == '|')) {
-                    count++;
-                }
-            }
-        }
-        return count;
+    private ArrayList<Long> evaluate(ArrayList<Long> zahlen) {
+        ArrayList<Long> unterergebnisse = new ArrayList<>();
+        unterergebnisse.addAll(plus(zahlen.getFirst(), 1, zahlen));
+        unterergebnisse.addAll(multi(zahlen.getFirst(), 1, zahlen));
+        unterergebnisse.addAll(concatenate(zahlen.getFirst(), 1, zahlen));
+        return unterergebnisse;
     }
 
-    private void printMap(Character[][] lab) {
-        System.out.println();
-        for (int x=0; x<lab.length; x++) {
-            for (int y=0; y<lab[x].length; y++) {
-                System.out.print(lab[x][y]);
-            }
-            System.out.println();
+    private ArrayList<Long> plus(Long bereitsBerechnet, int i, ArrayList<Long> zahlen) {
+        var index = i;
+        ArrayList<Long> unterergebnisse = new ArrayList<>();
+        if (bereitsBerechnet == null) {
+            bereitsBerechnet = 0L;
         }
-        System.out.println();
+        var neuBerechnet = bereitsBerechnet + zahlen.get(index);
+        if (index < zahlen.size()-1) {
+            unterergebnisse.addAll(plus(neuBerechnet, index+1, zahlen));
+            unterergebnisse.addAll(multi(neuBerechnet, index+1, zahlen));
+            unterergebnisse.addAll(concatenate(neuBerechnet, index+1, zahlen));
+        } else {
+            unterergebnisse.add(neuBerechnet);
+        }
+        return unterergebnisse;
     }
 
-    private int moveGuard(Character[][] area, Guard guard, Set<Guard> pastPositions) {
-        var newPosition = '.';
-        if (pastPositions != null) {
-            if (pastPositions.contains(guard)) {
-                return -1;
-            }
-            pastPositions.add(new Guard(guard.x, guard.y, guard.direction));
+    private ArrayList<Long> multi(Long bereitsBerechnet, int i, ArrayList<Long> zahlen) {
+        var index = i;
+        ArrayList<Long> unterergebnisse = new ArrayList<>();
+        if (bereitsBerechnet == null) {
+            bereitsBerechnet = 1L;
         }
-        switch (guard.direction) {
-            case 'L': // links
-                area[guard.x][guard.y] = '-';
-                if (guard.y == 0) {
-                    return 1;
-                }
-                newPosition = area[guard.x][guard.y-1];
-                if ((newPosition == '#') || (newPosition == 'O')) {
-                    return turnRight(guard, area, pastPositions);
-                } else {
-                    guard.y--;
-                }
-                area[guard.x][guard.y] = '<';
-                break;
-            case 'R':
-                area[guard.x][guard.y] = '-';
-                if (guard.y == area[0].length-1) {
-                    return 1;
-                }
-                newPosition = area[guard.x][guard.y+1];
-                if ((newPosition == '#') || (newPosition == 'O')) {
-                    return turnRight(guard, area, pastPositions);
-                } else {
-                    guard.y++;
-                }
-                area[guard.x][guard.y] = '>';
-                break;
-            case 'U':
-                area[guard.x][guard.y] = '|';
-                if (guard.x == 0) {
-                    return 1;
-                }
-                newPosition = area[guard.x-1][guard.y];
-                if ((newPosition == '#') || (newPosition == 'O')) {
-                    return turnRight(guard, area, pastPositions);
-                } else {
-                    guard.x--;
-                }
-                area[guard.x][guard.y] = '^';
-                break;
-            case 'D': // unten
-                area[guard.x][guard.y] = '|';
-                if (guard.x == area.length-1) {
-                    return 1;
-                }
-                newPosition = area[guard.x+1][guard.y];
-                if ((newPosition == '#') || (newPosition == 'O')) {
-                    return turnRight(guard, area, pastPositions);
-                } else {
-                    guard.x++;
-                }
-                area[guard.x][guard.y] = 'v';
-                break;
+        var neuBerechnet = bereitsBerechnet * zahlen.get(index);
+        if (index < zahlen.size()-1) {
+            unterergebnisse.addAll(plus(neuBerechnet, index+1, zahlen));
+            unterergebnisse.addAll(multi(neuBerechnet, index+1, zahlen));
+            unterergebnisse.addAll(concatenate(neuBerechnet, index+1, zahlen));
+        } else {
+            unterergebnisse.add(neuBerechnet);
         }
-        return 0;
+        return unterergebnisse;
     }
 
-    private int turnRight(Guard guard, Character[][] area, Set<Guard> pastPositions) {
-        var newDirection = 'X';
-        switch (guard.direction) {
-            case 'U':
-                newDirection = 'R';
-                break;
-            case 'D':
-                newDirection = 'L';
-                break;
-            case 'L':
-                newDirection = 'U';
-                break;
-            case 'R':
-                newDirection = 'D';
+    private ArrayList<Long> concatenate(Long bereitsBerechnet, int i, ArrayList<Long> zahlen) {
+        var index = i;
+        ArrayList<Long> unterergebnisse = new ArrayList<>();
+        String zahl1 = bereitsBerechnet.toString();
+        String zahl2 = zahlen.get(index).toString();
+        String ergebnis = zahl1 + zahl2;
+        var neuBerechnet = Long.valueOf(ergebnis);
+        if (index < zahlen.size()-1) {
+            unterergebnisse.addAll(plus(neuBerechnet, index+1, zahlen));
+            unterergebnisse.addAll(multi(neuBerechnet, index+1, zahlen));
+            unterergebnisse.addAll(concatenate(neuBerechnet, index+1, zahlen));
+        } else {
+            unterergebnisse.add(neuBerechnet);
         }
-        guard.direction = newDirection;
-        return moveGuard(area, guard, pastPositions);
+        return unterergebnisse;
     }
 
-    private Guard findGuard(Character[][] area) {
-        Guard guard = new Guard();
-        for (int x=0; x<area.length; x++) {
-            for (int y=0; y<area[x].length; y++) {
-                switch (area[x][y]) {
-                    case '<':
-                        guard.x = x;
-                        guard.y = y;
-                        guard.direction = 'L';
-                        return guard;
-                    case '>':
-                        guard.x = x;
-                        guard.y = y;
-                        guard.direction = 'R';
-                        return guard;
-                    case 'v':
-                        guard.x = x;
-                        guard.y = y;
-                        guard.direction = 'D';
-                        return guard;
-                    case '^':
-                        guard.x = x;
-                        guard.y = y;
-                        guard.direction = 'U';
-                        return guard;
-                }
-            }
-        }
-        return null;
-    }
-
-    private static Character[][] readFile(String file) {
-        ArrayList<ArrayList<Character>> list = new ArrayList<>();
+    private static ArrayList<String> readFile(String file) {
+        ArrayList<String> list = new ArrayList<>();
         try {
             Scanner scanner = new Scanner(new java.io.File(file));
-            var zeile = -1;
             while (scanner.hasNextLine()) {
                 String rawline = scanner.nextLine();
-                zeile++;
-                list.add(new ArrayList<>());
-                for (int spalte = 0; spalte < rawline.length(); spalte++) {
-                    char c = rawline.charAt(spalte);
-                    list.get(zeile).add(c);
-                }
+                list.add(rawline);
             }
             scanner.close();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        Character[][] matrix = new Character[list.size()][list.getFirst().size()];
-        for (int zeile = 0; zeile < list.size(); zeile++) {
-            for (int spalte = 0; spalte < list.get(zeile).size(); spalte++) {
-                matrix[zeile][spalte] = list.get(zeile).get(spalte);
-            }
-        }
-        return matrix;
+        return list;
     }
 }
